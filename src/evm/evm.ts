@@ -3,22 +3,27 @@ import type {Unsafe} from "src/util/type";
 import type {Transaction} from "src/evm/transaction";
 import type {Account} from "./account";
 import type {Maybe} from "src/util/type";
+import type {ContractMethod} from "ethers";
 import {Wallet} from "ethers";
 import {JsonRpcProvider} from "ethers";
 import {Interface} from "ethers";
+import {Contract} from "ethers";
 import {some} from "src/util/type";
 import {assert} from "src/util/assert";
 
-export async function Evm(_url: string) {
+export type Evm = {
+    unlock(_key: string): Account;
+};
+
+export function Evm(_url: string): Evm {
     let _provider: JsonRpcProvider;
-    let _account: Wallet;
 
     /***/ {
         _provider = new JsonRpcProvider(_url);
     }
 
     /***/ {
-        return ({});
+        return ({unlock});
     }
 
     function unlock(_key: string): Account {
@@ -57,6 +62,11 @@ export async function Evm(_url: string) {
         const defaultAmount: bigint = 0n;
         const defaultConfirmations: bigint = 1n;
         switch (transaction.type) {
+            case "query":
+                const contract: Contract = new Contract(transaction.to, [transaction.signature], signer);
+                const contractMethod: ContractMethod = contract.getFunction(/** @todo a way to get signature name */);
+                return (await contractMethod(transaction.args));
+
             case "call":
                 transaction.gasPrice ??= defaultGasPrice;
                 transaction.gasLimit ??= defaultGasLimit;
@@ -75,6 +85,7 @@ export async function Evm(_url: string) {
                     })).wait(Number(transaction.confirmations)));
                 assert(some(response), "NO_RESPONSE");
                 return (response);
+
             default: assert(false, "UNSUPPORTED_TRANSACTION");
         }
     }
