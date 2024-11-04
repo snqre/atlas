@@ -15,11 +15,10 @@ export type Query<T extends Array<unknown>> = {
 };
 
 export const Query = <T extends Array<unknown>>({
-    type, 
     to, 
     signature, 
     args}: Query<T>) => ({
-        type, 
+        type: "query", 
         to, 
         signature, 
         args});
