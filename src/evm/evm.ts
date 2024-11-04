@@ -2,9 +2,12 @@ import type {TransactionReceipt} from "ethers";
 import type {Unsafe} from "src/util/type";
 import type {Transaction} from "src/evm/transaction";
 import type {Account} from "./account";
+import type {Maybe} from "src/util/type";
 import {Wallet} from "ethers";
 import {JsonRpcProvider} from "ethers";
 import {Interface} from "ethers";
+import {some} from "src/util/type";
+import {assert} from "src/util/assert";
 
 export async function Evm(_url: string) {
     let _provider: JsonRpcProvider;
@@ -43,28 +46,36 @@ export async function Evm(_url: string) {
             }
         
             async function send<T extends Array<unknown>>(transaction: Transaction<T>): Promise<TransactionReceipt | Unsafe> {
-                const defaultGasPrice: bigint = 20000000000n;
-                const defaultGasLimit: bigint = 10000000n;
-                const defaultAmount: bigint = 0n;
-                const defaultConfirmations: bigint = 1n;
-                switch (transaction.type) {
-                    case "call":
-                        transaction.gasPrice ??= defaultGasPrice;
-                        transaction.gasLimit ??= defaultGasLimit;
-                        transaction.amount ??= defaultAmount;
-                        transaction.confirmations ??= defaultConfirmations;
-                        return (await (await _signer.sendTransaction({
-                            from: await address(),
-                            to: transaction.to,
-                            nonce: Number(await nextNonce()),
-                            gasPrice: transaction.gasPrice,
-                            gasLimit: transaction.gasLimit,
-                            value: transaction.amount,
-                            chainId: transaction.chainId,
-                            data: new Interface([transaction.signature])
-                        })).wait(Number(transaction.confirmations)));
-                }
+                return (await _send(transaction, _signer));
             }
         })();
+    }
+
+    async function _send<T extends Array<unknown>>(transaction: Transaction<T>, signer: Wallet): Promise<TransactionReceipt | Unsafe> {
+        const defaultGasPrice: bigint = 20000000000n;
+        const defaultGasLimit: bigint = 10000000n;
+        const defaultAmount: bigint = 0n;
+        const defaultConfirmations: bigint = 1n;
+        switch (transaction.type) {
+            case "call":
+                transaction.gasPrice ??= defaultGasPrice;
+                transaction.gasLimit ??= defaultGasLimit;
+                transaction.amount ??= defaultAmount;
+                transaction.confirmations ??= defaultConfirmations;
+                const response: Maybe<TransactionReceipt> = 
+                    (await (await signer.sendTransaction({
+                        from: await signer.getAddress(),
+                        to: transaction.to,
+                        nonce: Number(await signer.getNonce()),
+                        gasPrice: transaction.gasPrice,
+                        gasLimit: transaction.gasLimit,
+                        value: transaction.amount,
+                        chainId: transaction.chainId,
+                        data: new Interface([transaction.signature])
+                    })).wait(Number(transaction.confirmations)));
+                assert(some(response), "NO_RESPONSE");
+                return (response);
+            default: assert(false, "UNSUPPORTED_TRANSACTION");
+        }
     }
 }
