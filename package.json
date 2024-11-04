@@ -12,5 +12,8 @@
 	},
 	"peerDependencies": {
 		"typescript": "^5.0.0"
+	},
+	"dependencies": {
+		"solc": "^0.8.28"
 	}
 }
