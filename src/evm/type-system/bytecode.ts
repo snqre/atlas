@@ -1,0 +1,1 @@
+export type Bytecode = `0x${string}` | string;

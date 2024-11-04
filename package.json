@@ -1,0 +1,16 @@
+{
+	"name": "atlas",
+	"module": "./target/index.js",
+	"type": "module",
+	"exports": {
+		".": "./target/index.js",
+		"./evm": "./target/evm/index.js",
+		"./util": "./target/util/index.js"
+	},
+	"devDependencies": {
+		"@types/bun": "latest"
+	},
+	"peerDependencies": {
+		"typescript": "^5.0.0"
+	}
+}
