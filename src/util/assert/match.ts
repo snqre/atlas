@@ -1,4 +1,3 @@
-import type {MaybeAsync} from "src/util/type";
 import type {UnsafeLike} from "src/util/type";
 import type {HandleErrorAction} from "./";
 import {Unsafe} from "src/util/type";
