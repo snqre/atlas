@@ -11,6 +11,7 @@
 	},
 	"dependencies": {
 		"ethers": "^6.13.4",
+		"kyudo": "https://github.com/snqre/kyudo.git#main",
 		"solc": "^0.8.28"
 	}
 }

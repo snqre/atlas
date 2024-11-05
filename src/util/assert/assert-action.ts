@@ -1,1 +1,0 @@
-export type AssertAction = <Code extends string>(condition: boolean, code: Code) => asserts condition;

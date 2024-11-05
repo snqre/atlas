@@ -81,10 +81,13 @@ export function Evm(_url: string): Evm {
                         gasLimit: transaction.gasLimit,
                         value: transaction.amount,
                         chainId: transaction.chainId,
-                        data: new Interface([transaction.signature])
+                        data: new Interface([transaction.signature]).encodeFunctionData(/** @todo a way to get signature name */)
                     })).wait(Number(transaction.confirmations)));
                 assert(some(response), "NO_RESPONSE");
                 return (response);
+
+            case "deployment":
+                return ();
 
             default: assert(false, "UNSUPPORTED_TRANSACTION");
         }
