@@ -1,1 +1,0 @@
-export type Selector = `${string}(${string})`;
